@@ -1,65 +1,103 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { useState, useCallback } from 'react'
+
+import Cursor       from '@/components/Cursor'
+import Loader       from '@/components/Loader'
+import SmoothScroll from '@/components/SmoothScroll'
+import Hero         from '@/components/Hero'
+import Problem      from '@/components/Problem'
+import Solution     from '@/components/Solution'
+import Architecture from '@/components/Architecture'
+import Demo         from '@/components/Demo'
+import Features     from '@/components/Features'
+import Footer       from '@/components/Footer'
+
+// ── Sticky nav ────────────────────────────────────────────────
+function Nav() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 py-4 pointer-events-none">
+      {/* Logo */}
+      <a
+        href="#hero"
+        className="pointer-events-auto flex items-center gap-2.5 group"
+        aria-label="TACVS home"
+      >
+        <div className="w-8 h-8 rounded-lg glass-bright flex items-center justify-center glow-primary transition-all group-hover:scale-110">
+          <svg className="w-4 h-4 text-[#00d4ff]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round"
+              d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+          </svg>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
+        <span className="font-display font-bold text-white text-sm tracking-wide">TACVS</span>
+      </a>
+
+      {/* Links */}
+      <div className="pointer-events-auto hidden md:flex items-center gap-1 glass rounded-full px-4 py-2">
+        {[
+          { label: 'Problem',      href: '#problem'      },
+          { label: 'Solution',     href: '#solution'     },
+          { label: 'Architecture', href: '#architecture' },
+          { label: 'Demo',         href: '#demo'         },
+          { label: 'Features',     href: '#features'     },
+        ].map(({ label, href }) => (
           <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            key={label}
+            href={href}
+            className="px-3 py-1.5 text-xs text-white/50 hover:text-white rounded-full hover:bg-white/8 transition-all duration-200 font-medium"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
+            {label}
           </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        ))}
+      </div>
+
+      {/* CTA */}
+      <a
+        href="https://your-app.vercel.app" /* TODO: replace with your Vercel URL */
+        target="_blank"
+        rel="noopener noreferrer"
+        className="pointer-events-auto btn-primary text-sm py-2 px-5"
+      >
+        Launch App ↗
+      </a>
+    </nav>
+  )
+}
+
+// ── Page ──────────────────────────────────────────────────────
+export default function Page() {
+  const [loaded, setLoaded] = useState(false)
+
+  const handleLoaderDone = useCallback(() => setLoaded(true), [])
+
+  return (
+    <>
+      {/* Custom cursor – always on top */}
+      <Cursor />
+
+      {/* Animated loader – hides once done */}
+      <Loader onComplete={handleLoaderDone} />
+
+      {/* Main content – rendered underneath loader, revealed on exit */}
+      <SmoothScroll>
+        <div
+          style={{
+            opacity: loaded ? 1 : 0,
+            transition: 'opacity 0.4s ease 0.1s',
+          }}
+        >
+          <Nav />
+          <main>
+            <Hero />
+            <Problem />
+            <Solution />
+            <Architecture />
+            <Demo />
+            <Features />
+          </main>
+          <Footer />
         </div>
-      </main>
-    </div>
-  );
+      </SmoothScroll>
+    </>
+  )
 }
