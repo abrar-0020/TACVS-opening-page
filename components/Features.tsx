@@ -1,11 +1,7 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-
-gsap.registerPlugin(ScrollTrigger)
 
 const features = [
   {
@@ -95,25 +91,16 @@ const containerVariants = {
 }
 
 const cardVariants = {
-  hidden:  { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' as const } },
+  hidden:  { opacity: 0, y: 40, scale: 0.95 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.65, ease: [0.25, 0.46, 0.45, 0.94] as const } },
 }
 
 export default function Features() {
-  const sectionRef = useRef<HTMLElement>(null)
-  const gridRef    = useRef<HTMLDivElement>(null)
-  const inView     = useInView(gridRef, { once: true, margin: '-60px' })
-
-  useEffect(() => {
-    if (!sectionRef.current) return
-    const ctx = gsap.context(() => {
-      gsap.from('.features-heading', {
-        y: 40, opacity: 0, duration: 0.8, ease: 'power3.out',
-        scrollTrigger: { trigger: '.features-heading', start: 'top 85%', toggleActions: 'play none none reverse' },
-      })
-    }, sectionRef)
-    return () => ctx.revert()
-  }, [])
+  const sectionRef  = useRef<HTMLElement>(null)
+  const headingRef  = useRef<HTMLDivElement>(null)
+  const gridRef     = useRef<HTMLDivElement>(null)
+  const headingInView = useInView(headingRef, { once: true, margin: '-80px' })
+  const inView      = useInView(gridRef, { once: true, margin: '-60px' })
 
   // Tilt effect handler
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -132,7 +119,7 @@ export default function Features() {
     <section
       ref={sectionRef}
       id="features"
-      className="relative py-32 px-6 overflow-hidden"
+      className="relative min-h-screen flex flex-col items-center justify-center py-24 px-6 md:px-12 lg:px-16 overflow-hidden"
       style={{ background: 'linear-gradient(180deg, #050505 0%, #080b12 50%, #050505 100%)' }}
     >
       <div className="absolute inset-0 grid-overlay opacity-40" />
@@ -143,9 +130,15 @@ export default function Features() {
         style={{ background: 'radial-gradient(ellipse at top, rgba(0,212,255,0.06) 0%, transparent 70%)' }}
       />
 
-      <div className="relative z-10 max-w-6xl mx-auto">
+      <div className="relative z-10 w-full max-w-7xl mx-auto">
         {/* Header */}
-        <div className="features-heading text-center mb-20">
+        <motion.div
+          ref={headingRef}
+          initial={{ opacity: 0, y: 40 }}
+          animate={headingInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="w-full text-center mb-14"
+        >
           <span className="section-label mb-6 inline-flex">
             <span className="w-1.5 h-1.5 rounded-full bg-[#00d4ff] inline-block animate-pulse" />
             Features
@@ -154,16 +147,16 @@ export default function Features() {
             Everything You Need for{' '}
             <span className="text-gradient-primary">Trust</span>
           </h2>
-          <p className="mt-5 max-w-2xl mx-auto text-white/50 text-lg leading-relaxed">
+          <p className="mt-5 max-w-2xl mx-auto text-white/50 text-lg leading-relaxed w-full">
             A complete credential lifecycle — from issuance to verification —
             built natively on the blockchain.
           </p>
-        </div>
+        </motion.div>
 
         {/* Feature grid */}
         <motion.div
           ref={gridRef}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"
           variants={containerVariants}
           initial="hidden"
           animate={inView ? 'visible' : 'hidden'}
@@ -172,7 +165,7 @@ export default function Features() {
             <motion.div
               key={f.title}
               variants={cardVariants}
-              className="feature-card glass rounded-2xl p-7 flex flex-col gap-5 cursor-none"
+              className="feature-card group glass rounded-2xl p-8 flex flex-col items-center text-center gap-6 cursor-none"
               style={{ border: `1px solid ${f.color}40`, transition: 'transform 0.2s ease, box-shadow 0.3s ease' }}
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}

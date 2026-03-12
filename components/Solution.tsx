@@ -9,8 +9,8 @@ const stepContainerVariants = {
 }
 
 const stepVariants = {
-  hidden:  { opacity: 0, x: -40 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease: 'easeOut' as const } },
+  hidden:  { opacity: 0, x: -40, scale: 0.97 },
+  visible: { opacity: 1, x: 0, scale: 1, transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] as const } },
 }
 
 const steps = [
@@ -70,15 +70,17 @@ const steps = [
 ]
 
 export default function Solution() {
+  const headingRef   = useRef<HTMLDivElement>(null)
   const stepsRef     = useRef<HTMLDivElement>(null)
   const visualRef    = useRef<HTMLDivElement>(null)
+  const headingInView = useInView(headingRef, { once: true, margin: '-80px' })
   const stepsInView  = useInView(stepsRef,  { once: true, margin: '-60px' })
   const visualInView = useInView(visualRef, { once: true, margin: '-60px' })
 
   return (
     <section
       id="solution"
-      className="relative py-32 px-6 overflow-hidden"
+      className="relative min-h-screen flex flex-col items-center justify-center py-24 px-6 md:px-12 lg:px-16 overflow-hidden"
       style={{ background: 'linear-gradient(180deg, #050505 0%, #080b12 100%)' }}
     >
       {/* Grid + glow */}
@@ -88,7 +90,7 @@ export default function Solution() {
         style={{ background: 'radial-gradient(ellipse at right, rgba(0,212,255,0.07) 0%, transparent 70%)' }}
       />
 
-      <div className="relative z-10 max-w-6xl mx-auto">
+      <div className="relative z-10 w-full max-w-7xl mx-auto">
         {/* Label */}
         <div className="flex justify-center mb-6">
           <span className="section-label">
@@ -98,20 +100,28 @@ export default function Solution() {
         </div>
 
         {/* Heading */}
-        <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight text-center mb-6">
-          Blockchain makes credentials{' '}
-          <span className="text-gradient-primary">unbreakable</span>
-        </h2>
-        <p className="text-center text-white/50 max-w-2xl mx-auto mb-20 text-lg leading-relaxed">
-          By anchoring academic records to a public blockchain, we eliminate every
-          vector that fraudsters exploit — and make honesty the path of least resistance.
-        </p>
+        <motion.div
+          ref={headingRef}
+          initial={{ opacity: 0, y: 40 }}
+          animate={headingInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="w-full"
+        >
+          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight text-center mb-10">
+            Blockchain makes credentials{' '}
+            <span className="text-gradient-primary">unbreakable</span>
+          </h2>
+          <p className="w-full text-center text-white/50 max-w-2xl mx-auto mb-16 text-lg leading-relaxed">
+            By anchoring academic records to a public blockchain, we eliminate every
+            vector that fraudsters exploit — and make honesty the path of least resistance.
+          </p>
+        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
           {/* Steps */}
           <motion.div
             ref={stepsRef}
-            className="flex flex-col gap-5"
+            className="flex flex-col gap-8"
             variants={stepContainerVariants}
             initial="hidden"
             animate={stepsInView ? 'visible' : 'hidden'}
@@ -120,7 +130,7 @@ export default function Solution() {
               <motion.div
                 key={step.num}
                 variants={stepVariants}
-                className="flex gap-5 glass rounded-2xl p-5 group hover:border-white/15 transition-all duration-300"
+                className="flex gap-5 glass rounded-2xl p-6 group hover:border-white/15 transition-all duration-300 items-center"
               >
                 {/* Number + line */}
                 <div className="flex flex-col items-center gap-2 flex-shrink-0">

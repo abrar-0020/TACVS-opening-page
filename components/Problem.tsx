@@ -19,8 +19,8 @@ const containerVariants = {
 }
 
 const cardVariants = {
-  hidden:  { opacity: 0, y: 50 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: 'easeOut' as const } },
+  hidden:  { opacity: 0, y: 50, scale: 0.95 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] as const } },
 }
 
 const problems = [
@@ -80,7 +80,7 @@ export default function Problem() {
   return (
     <section
       id="problem"
-      className="relative py-32 px-6 bg-[#050505] overflow-hidden"
+      className="relative min-h-screen flex flex-col items-center justify-center py-24 bg-[#050505] overflow-hidden"
     >
       {/* Background accents */}
       <div className="absolute inset-0 grid-overlay opacity-50" />
@@ -89,7 +89,7 @@ export default function Problem() {
         style={{ background: 'radial-gradient(ellipse at top, rgba(239,68,68,0.05) 0%, transparent 70%)' }}
       />
 
-      <div className="relative z-10 max-w-6xl mx-auto">
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-6">
         {/* Label */}
         <div className="flex justify-center mb-6">
           <span className="section-label" style={{ borderColor: 'rgba(239,68,68,0.3)', color: '#ef4444', background: 'rgba(239,68,68,0.05)' }}>
@@ -104,7 +104,7 @@ export default function Problem() {
           variants={headingVariants}
           initial="hidden"
           animate={headingInView ? 'visible' : 'hidden'}
-          className="text-center mb-6"
+          className="text-center mb-10"
         >
           <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight">
             Academic fraud is a{' '}
@@ -115,7 +115,7 @@ export default function Problem() {
           variants={subtitleVariants}
           initial="hidden"
           animate={headingInView ? 'visible' : 'hidden'}
-          className="text-center text-white/50 max-w-2xl mx-auto mb-20 text-lg leading-relaxed"
+          className="text-center text-white/50 max-w-2xl mx-auto text-lg leading-relaxed"
         >
           Millions of fake credentials circulate worldwide. Existing verification
           systems are slow, expensive, and centralised — making them easy to exploit.
@@ -124,7 +124,7 @@ export default function Problem() {
         {/* Cards */}
         <motion.div
           ref={cardsRef}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-48"
           variants={containerVariants}
           initial="hidden"
           animate={cardsInView ? 'visible' : 'hidden'}
@@ -133,11 +133,11 @@ export default function Problem() {
             <motion.div
               key={item.title}
               variants={cardVariants}
-              className="glass rounded-2xl p-7 flex flex-col gap-5 group hover:border-white/15 transition-all duration-300 relative overflow-hidden"
+              className="glass rounded-2xl p-6 min-h-[200px] flex flex-col items-center text-center gap-4 group hover:border-white/15 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 relative overflow-hidden"
             >
               {/* Icon */}
               <div
-                className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
+                className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{
                   background: `rgba(${item.color === '#ef4444' ? '239,68,68' : item.color === '#f97316' ? '249,115,22' : '168,85,247'}, 0.12)`,
                   border: `1px solid rgba(${item.color === '#ef4444' ? '239,68,68' : item.color === '#f97316' ? '249,115,22' : '168,85,247'}, 0.3)`,
@@ -150,7 +150,7 @@ export default function Problem() {
               {/* Stat */}
               <div>
                 <div
-                  className="text-3xl font-bold font-display"
+                  className="text-2xl font-bold font-display"
                   style={{ color: item.color }}
                 >
                   {item.stat}

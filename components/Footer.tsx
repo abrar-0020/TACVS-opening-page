@@ -1,39 +1,31 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-
-gsap.registerPlugin(ScrollTrigger)
+import { useRef } from 'react'
+import { motion, useInView } from 'framer-motion'
 
 const links = {
   github: 'https://github.com/your-username/your-repo', /* TODO: replace */
   app:    'https://your-app.vercel.app',                /* TODO: replace */
 }
 
-export default function Footer() {
-  const sectionRef = useRef<HTMLElement>(null)
+const colVariants = {
+  hidden:  { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: 'easeOut' as const } },
+}
 
-  useEffect(() => {
-    if (!sectionRef.current) return
-    const ctx = gsap.context(() => {
-      gsap.from('.footer-col', {
-        y: 30, opacity: 0, duration: 0.7, stagger: 0.12, ease: 'power3.out',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top 85%',
-          toggleActions: 'play none none reverse',
-        },
-      })
-    }, sectionRef)
-    return () => ctx.revert()
-  }, [])
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.12 } },
+}
+
+export default function Footer() {
+  const gridRef     = useRef<HTMLDivElement>(null)
+  const gridInView  = useInView(gridRef, { once: true, margin: '-60px' })
 
   return (
     <footer
-      ref={sectionRef}
       id="footer"
-      className="relative pt-24 pb-10 px-6 overflow-hidden"
+      className="relative pt-32 pb-16 px-6 overflow-hidden"
       style={{ background: 'linear-gradient(180deg, #080b12 0%, #000000 100%)' }}
     >
       {/* Top border glow */}
@@ -44,44 +36,50 @@ export default function Footer() {
       {/* Background grid */}
       <div className="absolute inset-0 grid-overlay opacity-30" />
 
-      <div className="relative z-10 max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 pb-16 border-b border-white/8">
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-6">
+        <motion.div
+          ref={gridRef}
+          className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-20 pb-16 border-b border-white/8"
+          variants={containerVariants}
+          initial="hidden"
+          animate={gridInView ? 'visible' : 'hidden'}
+        >
 
           {/* Brand column */}
-          <div className="footer-col md:col-span-2 flex flex-col gap-5">
+          <motion.div variants={colVariants} className="md:col-span-2 flex flex-col gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg glass-bright flex items-center justify-center glow-primary">
+              <div className="w-10 h-10 rounded-lg glass-bright flex items-center justify-center glow-primary">
                 <svg className="w-5 h-5 text-[#00d4ff]" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round"
                     d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
                 </svg>
               </div>
               <div>
-                <div className="font-display font-bold text-white text-sm leading-tight">TACVS</div>
-                <div className="text-[10px] text-white/30 font-mono tracking-wider">Tokenized Credentials</div>
+                <div className="font-display font-bold text-white text-base leading-tight">TACVS</div>
+                <div className="text-[11px] text-white/30 font-mono tracking-wider">Tokenized Credentials</div>
               </div>
             </div>
 
-            <p className="text-white/45 text-sm leading-relaxed max-w-xs">
+            <p className="text-white/45 text-sm leading-relaxed max-w-sm">
               A blockchain-native academic credential verification system that
               issues, stores, and verifies degrees as NFTs — tamper-proof and
               instant.
             </p>
 
             {/* Tech tags */}
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2.5">
               {['Ethereum', 'IPFS', 'Solidity', 'Next.js', 'ERC-721'].map((t) => (
                 <span key={t} className="tag">{t}</span>
               ))}
             </div>
 
             {/* Social links */}
-            <div className="flex gap-3 mt-1">
+            <div className="flex gap-3 mt-2">
               <a
                 href={links.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-lg glass flex items-center justify-center text-white/50 hover:text-[#00d4ff] hover:border-[#00d4ff33] transition-colors duration-200"
+                className="w-10 h-10 rounded-lg glass flex items-center justify-center text-white/50 hover:text-[#00d4ff] hover:border-[#00d4ff33] transition-colors duration-200"
                 aria-label="GitHub"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -92,7 +90,7 @@ export default function Footer() {
                 href={links.app}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-lg glass flex items-center justify-center text-white/50 hover:text-[#00d4ff] hover:border-[#00d4ff33] transition-colors duration-200"
+                className="w-10 h-10 rounded-lg glass flex items-center justify-center text-white/50 hover:text-[#00d4ff] hover:border-[#00d4ff33] transition-colors duration-200"
                 aria-label="Live App"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -100,10 +98,10 @@ export default function Footer() {
                 </svg>
               </a>
             </div>
-          </div>
+          </motion.div>
 
           {/* Nav column */}
-          <div className="footer-col flex flex-col gap-5">
+          <motion.div variants={colVariants} className="flex flex-col gap-5">
             <h4 className="font-display font-semibold text-white text-sm">Navigation</h4>
             <ul className="flex flex-col gap-3">
               {[
@@ -125,10 +123,10 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
 
           {/* Stack column */}
-          <div className="footer-col flex flex-col gap-5">
+          <motion.div variants={colVariants} className="flex flex-col gap-5">
             <h4 className="font-display font-semibold text-white text-sm">Tech Stack</h4>
             <ul className="flex flex-col gap-3">
               {[
@@ -148,8 +146,8 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Bottom bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">

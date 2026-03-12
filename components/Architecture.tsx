@@ -1,11 +1,7 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useRef, Fragment } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-
-gsap.registerPlugin(ScrollTrigger)
 
 const nodes = [
   {
@@ -63,35 +59,22 @@ const nodeVariants = {
   visible: (i: number) => ({
     scale:   1,
     opacity: 1,
-    transition: { delay: i * 0.25, duration: 0.6, ease: [0.34, 1.56, 0.64, 1] },
+    transition: { delay: i * 0.25, duration: 0.7, ease: [0.34, 1.56, 0.64, 1] },
   }),
 }
 
 export default function Architecture() {
-  const sectionRef = useRef<HTMLElement>(null)
-  const diagramRef = useRef<HTMLDivElement>(null)
-  const inView     = useInView(diagramRef, { once: true, margin: '-80px' })
-
-  useEffect(() => {
-    if (!sectionRef.current) return
-    const ctx = gsap.context(() => {
-      gsap.from('.arch-heading', {
-        y: 40, opacity: 0, duration: 0.8, ease: 'power3.out',
-        scrollTrigger: { trigger: '.arch-heading', start: 'top 84%', toggleActions: 'play none none reverse' },
-      })
-      gsap.from('.arch-detail', {
-        y: 30, opacity: 0, duration: 0.7, stagger: 0.1, ease: 'power2.out',
-        scrollTrigger: { trigger: '.arch-details', start: 'top 80%', toggleActions: 'play none none reverse' },
-      })
-    }, sectionRef)
-    return () => ctx.revert()
-  }, [])
+  const diagramRef   = useRef<HTMLDivElement>(null)
+  const headingRef   = useRef<HTMLDivElement>(null)
+  const detailsRef   = useRef<HTMLDivElement>(null)
+  const inView        = useInView(diagramRef,  { once: true, margin: '-80px' })
+  const headingInView = useInView(headingRef,  { once: true, margin: '-80px' })
+  const detailsInView = useInView(detailsRef,  { once: true, margin: '-60px' })
 
   return (
     <section
-      ref={sectionRef}
       id="architecture"
-      className="relative py-32 px-6 bg-[#050505] overflow-hidden"
+      className="relative min-h-screen flex flex-col items-center justify-center py-24 px-6 md:px-12 lg:px-16 bg-[#050505] overflow-hidden"
     >
       <div className="absolute inset-0 grid-overlay opacity-40" />
       <div
@@ -99,7 +82,7 @@ export default function Architecture() {
         style={{ background: 'radial-gradient(ellipse at bottom, rgba(168,85,247,0.07) 0%, transparent 70%)' }}
       />
 
-      <div className="relative z-10 max-w-6xl mx-auto">
+      <div className="relative z-10 w-full max-w-7xl mx-auto">
         {/* Label */}
         <div className="flex justify-center mb-6">
           <span className="section-label" style={{ borderColor: 'rgba(168,85,247,0.3)', color: '#a855f7', background: 'rgba(168,85,247,0.05)' }}>
@@ -108,19 +91,27 @@ export default function Architecture() {
           </span>
         </div>
 
-        <h2 className="arch-heading font-display text-4xl md:text-5xl font-bold text-white tracking-tight text-center mb-6">
-          How the system{' '}
-          <span className="text-gradient-primary">flows</span>
-        </h2>
-        <p className="arch-heading text-center text-white/50 max-w-xl mx-auto mb-20 text-lg leading-relaxed">
-          Three actors, one immutable record. The blockchain is the single source
-          of truth that all parties can trust independently.
-        </p>
+        <motion.div
+          ref={headingRef}
+          initial={{ opacity: 0, y: 40 }}
+          animate={headingInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="w-full"
+        >
+          <h2 className="font-display text-4xl md:text-5xl font-bold text-white tracking-tight text-center mb-10">
+            How the system{' '}
+            <span className="text-gradient-primary">flows</span>
+          </h2>
+          <p className="w-full text-center text-white/50 max-w-xl mx-auto mb-16 text-lg leading-relaxed">
+            Three actors, one immutable record. The blockchain is the single source
+            of truth that all parties can trust independently.
+          </p>
+        </motion.div>
 
-        {/* Flow diagram */}
-        <div ref={diagramRef} className="relative flex flex-col md:flex-row items-center justify-center gap-0">
+        {/* Flow diagram – nodes & arrows as flat flex children for even centering */}
+        <div ref={diagramRef} className="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-8">
           {nodes.map((node, i) => (
-            <div key={node.id} className="flex flex-col md:flex-row items-center">
+            <Fragment key={node.id}>
               {/* Node */}
               <motion.div
                 custom={i}
@@ -129,7 +120,6 @@ export default function Architecture() {
                 animate={inView ? 'visible' : 'hidden'}
                 className="flex flex-col items-center gap-3"
               >
-                {/* Circle */}
                 <div
                   className="relative w-28 h-28 rounded-2xl flex flex-col items-center justify-center gap-2 glass"
                   style={{
@@ -138,8 +128,6 @@ export default function Architecture() {
                   }}
                 >
                   <span style={{ color: node.color }}>{node.icon}</span>
-
-                  {/* Pulse ring */}
                   {i === 1 && (
                     <div
                       className="absolute inset-0 rounded-2xl opacity-20 animate-pulse"
@@ -147,14 +135,10 @@ export default function Architecture() {
                     />
                   )}
                 </div>
-
-                {/* Labels */}
                 <div className="text-center">
                   <div className="font-display font-semibold text-white text-sm">{node.label}</div>
                   <div className="text-white/35 text-xs mt-0.5">{node.sublabel}</div>
                 </div>
-
-                {/* Action badge */}
                 <div
                   className="px-3 py-1 rounded-full text-xs font-mono"
                   style={{
@@ -167,70 +151,52 @@ export default function Architecture() {
                 </div>
               </motion.div>
 
-              {/* Arrow between nodes */}
+              {/* Arrow */}
               {i < nodes.length - 1 && (
                 <motion.div
-                  className="flex flex-col md:flex-row items-center mx-6 my-6 md:my-0"
+                  className="flex items-center justify-center"
                   initial={{ opacity: 0 }}
                   animate={inView ? { opacity: 1 } : { opacity: 0 }}
                   transition={{ delay: (i + 1) * 0.25 + 0.3, duration: 0.5 }}
                 >
-                  {/* SVG arrow */}
-                  <svg
-                    width="80" height="24"
-                    viewBox="0 0 80 24"
-                    fill="none"
-                    className="hidden md:block"
-                  >
-                    <motion.line
-                      x1="0" y1="12" x2="68" y2="12"
-                      stroke="#00d4ff"
-                      strokeWidth="1.5"
-                      strokeDasharray="4 3"
-                      variants={arrowVariants}
-                      initial="hidden"
-                      animate={inView ? 'visible' : 'hidden'}
-                    />
+                  <svg width="80" height="24" viewBox="0 0 80 24" fill="none" className="hidden md:block">
+                    <motion.line x1="0" y1="12" x2="68" y2="12" stroke="#00d4ff" strokeWidth="1.5" strokeDasharray="4 3" variants={arrowVariants} initial="hidden" animate={inView ? 'visible' : 'hidden'} />
                     <path d="M68 6 L80 12 L68 18Z" fill="#00d4ff" opacity="0.6" />
                   </svg>
-                  {/* Vertical arrow for mobile */}
-                  <svg
-                    width="24" height="60"
-                    viewBox="0 0 24 60"
-                    fill="none"
-                    className="block md:hidden"
-                  >
-                    <motion.line
-                      x1="12" y1="0" x2="12" y2="48"
-                      stroke="#00d4ff"
-                      strokeWidth="1.5"
-                      strokeDasharray="4 3"
-                      variants={arrowVariants}
-                      initial="hidden"
-                      animate={inView ? 'visible' : 'hidden'}
-                    />
+                  <svg width="24" height="60" viewBox="0 0 24 60" fill="none" className="block md:hidden">
+                    <motion.line x1="12" y1="0" x2="12" y2="48" stroke="#00d4ff" strokeWidth="1.5" strokeDasharray="4 3" variants={arrowVariants} initial="hidden" animate={inView ? 'visible' : 'hidden'} />
                     <path d="M6 48 L12 60 L18 48Z" fill="#00d4ff" opacity="0.6" />
                   </svg>
                 </motion.div>
               )}
-            </div>
+            </Fragment>
           ))}
         </div>
 
         {/* Detail cards */}
-        <div className="arch-details grid grid-cols-1 md:grid-cols-3 gap-5 mt-20">
+        <motion.div
+          ref={detailsRef}
+          className="grid grid-cols-1 md:grid-cols-3 gap-10 mt-16"
+          initial="hidden"
+          animate={detailsInView ? 'visible' : 'hidden'}
+          variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.12 } } }}
+        >
           {[
             { title: 'ERC-721 / ERC-1155 NFT',    body: 'Each credential is minted as a non-fungible token. The metadata hash is stored on-chain; documents are stored on IPFS.',   icon: '⬡' },
             { title: 'Solidity Smart Contract',     body: 'Role-based access control ensures only registered institutions can issue. Revocation and expiry are handled natively.',   icon: '⚙' },
             { title: 'Zero-Knowledge Proofs',       body: 'Selective disclosure — graduates can prove they hold a credential without revealing personal details to every verifier.', icon: '🔒' },
           ].map((card) => (
-            <div key={card.title} className="arch-detail glass rounded-2xl p-6 hover:border-white/15 transition-all duration-300">
+            <motion.div
+              key={card.title}
+              variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' as const } } }}
+              className="glass rounded-2xl p-6 hover:border-white/15 transition-all duration-300 flex flex-col items-center text-center"
+            >
               <div className="text-2xl mb-3">{card.icon}</div>
               <h4 className="font-display font-semibold text-white text-sm mb-2">{card.title}</h4>
               <p className="text-white/45 text-sm leading-relaxed">{card.body}</p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   )

@@ -1,107 +1,13 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { motion } from 'framer-motion'
+import { useEffect, useRef, useCallback } from 'react'
+import { motion, useMotionValue, useSpring } from 'framer-motion'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import BlockchainNetwork from './BlockchainNetwork'
+import Particles from './Particles'
 
 gsap.registerPlugin(ScrollTrigger)
-
-// ── Canvas particle / blockchain network ──────────────────────
-interface Particle {
-  x: number; y: number
-  vx: number; vy: number
-  radius: number
-  alpha: number
-  pulse: number
-  pulseSpeed: number
-}
-
-function initCanvas(canvas: HTMLCanvasElement) {
-  const ctx = canvas.getContext('2d')!
-  let W = 0, H = 0
-  let particles: Particle[] = []
-  let rafId: number
-  const PARTICLE_COUNT = 90
-  const LINK_DIST = 130
-
-  function resize() {
-    W = canvas.width  = canvas.offsetWidth
-    H = canvas.height = canvas.offsetHeight
-  }
-
-  function spawn(): Particle {
-    return {
-      x: Math.random() * W,
-      y: Math.random() * H,
-      vx: (Math.random() - 0.5) * 0.35,
-      vy: (Math.random() - 0.5) * 0.35,
-      radius: Math.random() * 1.5 + 0.5,
-      alpha: Math.random() * 0.5 + 0.3,
-      pulse: 0,
-      pulseSpeed: Math.random() * 0.02 + 0.005,
-    }
-  }
-
-  function init() {
-    resize()
-    particles = Array.from({ length: PARTICLE_COUNT }, spawn)
-  }
-
-  function draw() {
-    ctx.clearRect(0, 0, W, H)
-
-    // Update & draw particles
-    for (const p of particles) {
-      p.x += p.vx; p.y += p.vy
-      if (p.x < 0) p.x = W
-      if (p.x > W) p.x = 0
-      if (p.y < 0) p.y = H
-      if (p.y > H) p.y = 0
-
-      p.pulse += p.pulseSpeed
-      const a = p.alpha + Math.sin(p.pulse) * 0.15
-
-      ctx.beginPath()
-      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2)
-      ctx.fillStyle = `rgba(0,212,255,${a})`
-      ctx.fill()
-    }
-
-    // Draw connections
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const dx = particles[i].x - particles[j].x
-        const dy = particles[i].y - particles[j].y
-        const dist = Math.sqrt(dx * dx + dy * dy)
-        if (dist < LINK_DIST) {
-          const a = (1 - dist / LINK_DIST) * 0.35
-          // Every ~20th connection gets a purple tint
-          const isPurple = (i * j) % 17 === 0
-          ctx.beginPath()
-          ctx.moveTo(particles[i].x, particles[i].y)
-          ctx.lineTo(particles[j].x, particles[j].y)
-          ctx.strokeStyle = isPurple
-            ? `rgba(168,85,247,${a})`
-            : `rgba(0,212,255,${a})`
-          ctx.lineWidth = 0.6
-          ctx.stroke()
-        }
-      }
-    }
-
-    rafId = requestAnimationFrame(draw)
-  }
-
-  window.addEventListener('resize', resize)
-  init()
-  draw()
-
-  return () => {
-    cancelAnimationFrame(rafId)
-    window.removeEventListener('resize', resize)
-  }
-}
 
 // ── Animation variants ────────────────────────────────────────
 const containerVariants = {
@@ -119,20 +25,32 @@ const fadeUp = {
 
 // ── Component ─────────────────────────────────────────────────
 export default function Hero() {
-  const canvasRef  = useRef<HTMLCanvasElement>(null)
+  const bgRef      = useRef<HTMLDivElement>(null)
   const sectionRef = useRef<HTMLElement>(null)
-  const badgeRef   = useRef<HTMLDivElement>(null)
+  const gridRef    = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (!canvasRef.current) return
-    return initCanvas(canvasRef.current)
-  }, [])
+  // Magnetic button
+  const magnetX = useMotionValue(0)
+  const magnetY = useMotionValue(0)
+  const springX = useSpring(magnetX, { stiffness: 150, damping: 15 })
+  const springY = useSpring(magnetY, { stiffness: 150, damping: 15 })
 
-  // Subtle parallax on the canvas
+  const handleMagnet = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    magnetX.set((e.clientX - rect.left - rect.width / 2) * 0.3)
+    magnetY.set((e.clientY - rect.top - rect.height / 2) * 0.3)
+  }, [magnetX, magnetY])
+
+  const handleMagnetLeave = useCallback(() => {
+    magnetX.set(0)
+    magnetY.set(0)
+  }, [magnetX, magnetY])
+
+  // Subtle parallax on the canvas wrapper
   useEffect(() => {
-    if (!canvasRef.current || !sectionRef.current) return
+    if (!bgRef.current || !sectionRef.current) return
     const ctx = gsap.context(() => {
-      gsap.to(canvasRef.current, {
+      gsap.to(bgRef.current, {
         yPercent: 20,
         ease: 'none',
         scrollTrigger: {
@@ -146,21 +64,42 @@ export default function Hero() {
     return () => ctx.revert()
   }, [])
 
+  // Grid parallax via mouse movement
+  useEffect(() => {
+    const grid = gridRef.current
+    if (!grid) return
+    function onMouseMove(e: MouseEvent) {
+      const x = (e.clientX / window.innerWidth - 0.5) * 12
+      const y = (e.clientY / window.innerHeight - 0.5) * 12
+      grid!.style.transform = `translate(${x}px, ${y}px)`
+    }
+    window.addEventListener('mousemove', onMouseMove)
+    return () => window.removeEventListener('mousemove', onMouseMove)
+  }, [])
+
   return (
     <section
       ref={sectionRef}
       id="hero"
       className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[#050505]"
     >
-      {/* Particle canvas */}
-      <canvas
-        ref={canvasRef}
+      {/* Blockchain network canvas */}
+      <div ref={bgRef} className="absolute inset-0 w-full h-full">
+        <BlockchainNetwork
+          className="absolute inset-0 w-full h-full"
+          style={{ opacity: 0.65 }}
+        />
+      </div>
+
+      {/* Floating particles */}
+      <Particles
         className="absolute inset-0 w-full h-full"
-        style={{ opacity: 0.65 }}
+        style={{ opacity: 0.45, zIndex: 1 }}
+        count={45}
       />
 
-      {/* Grid overlay */}
-      <div className="grid-overlay" />
+      {/* Grid overlay with parallax */}
+      <div ref={gridRef} className="grid-overlay" />
 
       {/* Radial gradient – bottom centre bloom */}
       <div
@@ -179,7 +118,6 @@ export default function Hero() {
 
         {/* Badge */}
         <motion.div
-          ref={badgeRef}
           initial={{ opacity: 0, y: -16, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.1 }}
@@ -231,17 +169,22 @@ export default function Hero() {
           transition={{ delay: 1.1 }}
           className="flex flex-wrap items-center justify-center gap-4"
         >
-          <a
+          <motion.a
             href="https://your-app.vercel.app" /* TODO: replace with your Vercel URL */
             target="_blank"
             rel="noopener noreferrer"
             className="btn-primary text-base"
+            style={{ x: springX, y: springY }}
+            onMouseMove={handleMagnet}
+            onMouseLeave={handleMagnetLeave}
+            whileHover={{ scale: 1.06, boxShadow: '0 0 40px rgba(0,212,255,0.5)' }}
+            whileTap={{ scale: 0.97 }}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
             </svg>
             Launch App
-          </a>
+          </motion.a>
           <a
             href="https://github.com/your-username/your-repo" /* TODO: replace with your GitHub URL */
             target="_blank"

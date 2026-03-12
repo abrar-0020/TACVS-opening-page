@@ -44,7 +44,7 @@ function Nav() {
           <a
             key={label}
             href={href}
-            className="px-3 py-1.5 text-xs text-white/50 hover:text-white rounded-full hover:bg-white/8 transition-all duration-200 font-medium"
+            className="px-3 py-1.5 text-xs text-white/80 hover:text-white rounded-full hover:bg-white/8 transition-all duration-200 font-medium"
           >
             {label}
           </a>
