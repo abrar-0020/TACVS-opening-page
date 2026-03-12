@@ -4,8 +4,8 @@ import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 
 const links = {
-  github: 'https://github.com/your-username/your-repo', /* TODO: replace */
-  app:    'https://your-app.vercel.app',                /* TODO: replace */
+  github: 'https://github.com/abrar-0020/Tokenized-Academic-Credential-Verification-System',
+  app:    'https://tokcred.vercel.app/',
 }
 
 const colVariants = {

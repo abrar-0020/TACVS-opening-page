@@ -170,7 +170,7 @@ export default function Hero() {
           className="flex flex-wrap items-center justify-center gap-4"
         >
           <motion.a
-            href="https://your-app.vercel.app" /* TODO: replace with your Vercel URL */
+            href="https://tokcred.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
             className="btn-primary text-base"
@@ -186,7 +186,7 @@ export default function Hero() {
             Launch App
           </motion.a>
           <a
-            href="https://github.com/your-username/your-repo" /* TODO: replace with your GitHub URL */
+            href="https://github.com/abrar-0020/Tokenized-Academic-Credential-Verification-System"
             target="_blank"
             rel="noopener noreferrer"
             className="btn-outline text-base"
