@@ -53,7 +53,7 @@ function Nav() {
 
       {/* CTA */}
       <a
-        href="https://your-app.vercel.app" /* TODO: replace with your Vercel URL */
+        href="https://tokcred.vercel.app/" /* TODO: replace with your Vercel URL */
         target="_blank"
         rel="noopener noreferrer"
         className="pointer-events-auto btn-primary text-sm py-2 px-5"

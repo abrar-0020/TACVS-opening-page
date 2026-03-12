@@ -16,11 +16,11 @@ const containerVariants = {
 }
 const wordVariants = {
   hidden:  { y: '110%', opacity: 0 },
-  visible: { y: '0%',   opacity: 1, transition: { duration: 0.75, ease: [0.33, 1, 0.68, 1] } },
+  visible: { y: '0%',   opacity: 1, transition: { duration: 0.75, ease: [0.33, 1, 0.68, 1] as const } },
 }
 const fadeUp = {
   hidden:  { y: 30, opacity: 0 },
-  visible: { y: 0,  opacity: 1, transition: { duration: 0.7, ease: 'easeOut' } },
+  visible: { y: 0,  opacity: 1, transition: { duration: 0.7, ease: 'easeOut' as const } },
 }
 
 // ── Component ─────────────────────────────────────────────────
