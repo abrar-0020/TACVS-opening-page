@@ -31,7 +31,7 @@ export default function Particles({ className, style, count = 50 }: ParticlesPro
     let W = 0
     let H = 0
     let dots: Dot[] = []
-    let rafId: number
+    let rafId: number | null = null
     let mouseX = -9999
     let mouseY = -9999
 
@@ -112,7 +112,9 @@ export default function Particles({ className, style, count = 50 }: ParticlesPro
     draw()
 
     return () => {
-      cancelAnimationFrame(rafId)
+      if (rafId !== null) {
+  cancelAnimationFrame(rafId)
+}
       window.removeEventListener('resize', resize)
       cvs.removeEventListener('mousemove', onMouseMove)
       cvs.removeEventListener('mouseleave', onMouseLeave)
